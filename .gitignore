@@ -1,0 +1,21 @@
+# Python cache
+__pycache__/
+
+# Environment
+.env
+venv/
+.env/
+
+# macOS
+.DS_Store
+
+# Development folders
+dev/
+task/
+
+# GitHub
+.github/
+
+# logs
+logs/
+
