@@ -43,9 +43,8 @@ async def get_nearby_carparks(
 
         carparks = data.get("carparks", [])
         if not isinstance(carparks, list):
-            raise HTTPException(
-                status_code=500, detail="Unexpected data structure from carpark API"
-            )
+            logger.warning("Unexpected structure: carparks is not a list")
+            return []
 
         nearby_carparks = []
         for carpark in carparks:
@@ -76,7 +75,7 @@ async def get_nearby_carparks(
 
     except Exception as e:
         logger.error(f"Error in get_nearby_carparks: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/{facility_id}", response_model=CarparkDetail)
