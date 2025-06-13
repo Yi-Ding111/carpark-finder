@@ -5,13 +5,17 @@ from datetime import datetime
 from cachetools import cached
 import logging
 
-from app.core.config import NSW_API_KEY, MAX_REQUESTS_PER_SECOND
+from app.core.config import (
+    MAX_REQUESTS_PER_SECOND,
+    NSW_TRANSPORT_BASE_API_URL,
+)
 from app.services.cache_service import (
     carpark_ids_cache,
     carpark_locations_cache,
     no_update_carparks_cache,
 )
 from app.utils.time_utils import get_local_time, parse_message_date
+from app.core.config import get_nsw_headers, get_facility_url
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +102,7 @@ def make_api_request(url, headers) -> dict | None:
 
     except requests.exceptions.RequestException as e:
         # 404 error, cannot find the resources
-        print(f"API request failed: {e}")
+        logger.error(f"API request failed: {e}")
 
         return None
 
@@ -116,9 +120,7 @@ def get_all_carpark_ids() -> Optional[Dict]:
                 ...
             }
     """
-    url = "https://api.transport.nsw.gov.au/v1/carpark"
-    headers = {"Authorization": f"apikey {NSW_API_KEY}", "Accept": "application/json"}
-    return make_api_request(url, headers)
+    return make_api_request(url=NSW_TRANSPORT_BASE_API_URL, headers=get_nsw_headers())
 
 
 def get_carpark_details(facility_id: str, retry_count: int = 3) -> Optional[Dict]:
@@ -172,14 +174,14 @@ def get_carpark_details(facility_id: str, retry_count: int = 3) -> Optional[Dict
         }
     """
 
-    url = f"https://api.transport.nsw.gov.au/v1/carpark?facility={facility_id}"
-    headers = {"Authorization": f"apikey {NSW_API_KEY}", "Accept": "application/json"}
-
     for attempt in range(retry_count):
         if attempt > 0:
             logger.info(f"Retry {attempt}/{retry_count-1} for facility {facility_id}")
-        response = make_api_request(url, headers)
+        response = make_api_request(
+            url=get_facility_url(facility_id), headers=get_nsw_headers()
+        )
         if response:
+            logger.info(f"API request successful for facility {facility_id}")
             return response
     return None
 
@@ -229,6 +231,7 @@ def fetch_no_update_carparks(carpark_ids: Dict, current_time: datetime) -> Set[s
         details = get_carpark_details(facility_id)
         if not details or is_carpark_no_update(details, current_time):
             no_update_set.add(str(facility_id))
+            logger.info(f"Facility {facility_id} is no-update")
     return no_update_set
 
 
