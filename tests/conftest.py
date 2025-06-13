@@ -1,10 +1,11 @@
 # provide mock data for testing
 
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 from app.main import app
-
+from httpx import AsyncClient
+from httpx._transports.asgi import ASGITransport
 
 @pytest.fixture
 def test_client():
@@ -20,6 +21,16 @@ def mock_url():
     Return a mock URL for testing
     """
     return "https://example.com"
+
+
+@pytest.fixture
+async def async_test_client(mock_url):
+    """
+    Set up an async test client for the FastAPI
+    """
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url=mock_url) as ac:
+        yield ac
 
 
 @pytest.fixture
