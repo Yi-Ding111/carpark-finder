@@ -1,16 +1,10 @@
 # provide mock data for testing
-# mock data for carpark locations
-# mock data for carpark details
-# mock data for carpark status
-# mock data for carpark occupancy
-# mock data for carpark message date
-# mock data for carpark message time
-# mock data for carpark message timezone
-# mock data for carpark message timestamp
 
 import pytest
+from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
 from app.main import app
+
 
 @pytest.fixture
 def test_client():
@@ -21,11 +15,55 @@ def test_client():
 
 
 @pytest.fixture
+def mock_url():
+    """
+    Return a mock URL for testing
+    """
+    return "https://example.com"
+
+
+@pytest.fixture
 def mock_api_key():
     """
-    Use a mock API key for testing
+    Return a mock API key for testing
     """
-    return "test_api_key"
+    return "mock_api_key"
+
+
+@pytest.fixture
+def mock_headers(mock_api_key):
+    """
+    Return a mock headers for testing
+    """
+    return {"X-API-Key": mock_api_key}
+
+
+@pytest.fixture
+def invalid_headers():
+    """
+    Return a mock invalid headers for testing
+    """
+    return {"X-API-Key": "invalid_key"}
+
+
+@pytest.fixture
+def missing_headers():
+    """
+    Return a mock missing headers for testing
+    """
+    return {}
+
+
+@pytest.fixture
+def mock_success_response():
+    """
+    Return a mock success response for testing
+    """
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {"result": "ok"}
+    mock_response.raise_for_status.return_value = None
+    return mock_response
 
 
 @pytest.fixture
@@ -37,6 +75,18 @@ def mock_sydney_local_time():
 
 
 @pytest.fixture
+def mock_all_carparks_response():
+    """
+    Return a mock all carpark response for testing
+    """
+    return {
+        "111": "carpark_1",
+        "222": "carpark_2",
+        "333": "carpark_3",
+    }
+
+
+@pytest.fixture
 def mock_carpark_locations():
     """
     Return mock carpark locations data.
@@ -44,20 +94,9 @@ def mock_carpark_locations():
     return {
         "carparks": [
             {
-                "facility_id": "test_id_1",
-                "name": "test_name_1",
-                "location": {
-                    "latitude": "-33.814583",
-                    "longitude": "151.009659"
-                }
-            },
-            {
-                "facility_id": "test_id_2",
-                "name": "test_name_2",
-                "location": {
-                    "latitude": "-33.856785",
-                    "longitude": "151.215302"
-                }
+                "facility_id": "111",
+                "name": "carpark_1",
+                "location": {"latitude": -33.814583, "longitude": 151.009659},
             }
         ]
     }
@@ -69,11 +108,11 @@ def mock_carpark_details():
     Return mock carpark available details.
     """
     return {
-        "facility_id": "CP001",
-        "facility_name": "Test Carpark 1",
+        "tsn": "1234567",
+        "facility_id": "111",
         "spots": "100",
-        "occupancy": {
-            "total": "60"
-        },
-        "MessageDate": "2024-03-20T10:00:00Z"
-    } 
+        "facility_name": "carpark_1",
+        "location": {"latitude": "-33.814583", "longitude": "151.009659"},
+        "occupancy": {"total": "60"},
+        "MessageDate": "2025-06-12T10:00:00",
+    }
