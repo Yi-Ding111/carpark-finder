@@ -92,51 +92,50 @@ async def get_carpark_available_details(
     Returns:
         dict: Carpark details including total spots, available spots, status and last update
     """
-    try:
-        no_update_carparks = get_no_update_carparks()
-        if facility_id in no_update_carparks:
-            return CarparkDetail(
-                facility_id=facility_id,
-                name="Unknown",
-                total_spots=0,
-                available_spots=0,
-                status="No Data Available",
-                timestamp=None,
-            )
-
-        details = get_carpark_details(facility_id)
-        if not details:
-            raise HTTPException(
-                status_code=404, detail=f"Carpark with ID {facility_id} not found"
-            )
-
-        total_spots = int(details.get("spots", 0))
-        occupancy = int(details.get("occupancy", {}).get("total", 0))
-
-        msg_date = details.get("MessageDate")
-        if not msg_date:
-            return CarparkDetail(
-                facility_id=facility_id,
-                name=details.get("facility_name", "Unknown"),
-                total_spots=total_spots,
-                available_spots=0,
-                status="No Data Available",
-                timestamp=None,
-            )
-
-        last_updated = parse_message_date(msg_date)
-        available_spots = total_spots - occupancy
-        status = available_status(total_spots, occupancy)
-
+    # Check if the carpark is no-update
+    no_update_set = get_no_update_carparks()
+    if facility_id in no_update_set:
         return CarparkDetail(
             facility_id=facility_id,
-            name=details.get("facility_name", "Unknown"),
-            total_spots=total_spots,
-            available_spots=available_spots,
-            status=status,
-            timestamp=last_updated,
+            name="Unknown",
+            total_spots=0,
+            available_spots=0,
+            status="No Data Available",
+            timestamp=None,
         )
 
-    except Exception as e:
-        logger.error(f"Error in get_carpark_details: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+    # Get the carpark details
+    details = get_carpark_details(facility_id)
+
+    # If the carpark is not found, return a 404 error
+    if not details:
+        raise HTTPException(status_code=404, detail=f"Carpark with ID {facility_id} not found")
+
+    # Get the total spots and occupancy
+    try:
+        total_spots = int(details.get("spots", 0))
+        occupancy = int(details.get("occupancy", {}).get("total", 0))
+    except (TypeError, ValueError) as e:
+        logger.error(f"Invalid spot or occupancy data for carpark {facility_id}: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+    # Get the timestamp
+    msg_date = details.get("MessageDate")
+    timestamp = None
+    if msg_date:
+        try:
+            timestamp = parse_message_date(msg_date)
+        except Exception as e:
+            logger.warning(f"Failed to parse MessageDate: {msg_date} ({e})")
+
+    available_spots = max(total_spots - occupancy, 0)
+    status = available_status(total_spots, occupancy)
+
+    return CarparkDetail(
+        facility_id=facility_id,
+        name=details.get("facility_name", "Unknown"),
+        total_spots=total_spots,
+        available_spots=available_spots,
+        status=status,
+        timestamp=timestamp,
+    )
