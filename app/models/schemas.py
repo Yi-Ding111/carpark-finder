@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 class Carpark(BaseModel):
-    facility_id: int
+    facility_id: str
     name: str
     distance_km: float
 
