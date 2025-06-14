@@ -5,10 +5,12 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 
 from app.core.security import verify_api_key
 from app.models.schemas import Carpark, CarparkDetail
-from app.services.nsw_transport_api import (available_status,
-                                            get_carpark_details,
-                                            get_carpark_locations,
-                                            get_no_update_carparks)
+from app.services.nsw_transport_api import (
+    available_status,
+    get_carpark_details,
+    get_carpark_locations,
+    get_no_update_carparks,
+)
 from app.utils.distance import haversine_distance
 from app.utils.time_utils import parse_message_date
 
@@ -66,7 +68,7 @@ async def get_nearby_carparks(
             except (TypeError, ValueError) as e:
                 logger.error(
                     "Error processing carpark {}: {}".format(
-                        carpark.get('facility_id'), e
+                        carpark.get("facility_id"), e
                     )
                 )
                 continue
@@ -74,13 +76,8 @@ async def get_nearby_carparks(
         return sorted(nearby_carparks, key=lambda x: x.distance_km)
 
     except Exception as e:
-        logger.error(
-            "Error in get_nearby_carparks: {}".format(str(e))
-        )
-        raise HTTPException(
-            status_code=500,
-            detail="Internal server error"
-        )
+        logger.error("Error in get_nearby_carparks: {}".format(str(e)))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/{facility_id}", response_model=CarparkDetail)
@@ -96,7 +93,8 @@ async def get_carpark_available_details(
         api_key (str): API key for authentication
 
     Returns:
-        dict: Carpark details including total spots, available spots, status and last update
+        dict: Carpark details including total spots, available spots,
+              status and last update
     """
     # Check if the carpark is no-update
     no_update_set = get_no_update_carparks()
@@ -116,8 +114,7 @@ async def get_carpark_available_details(
     # If the carpark is not found, return a 404 error
     if not details:
         raise HTTPException(
-            status_code=404,
-            detail="Carpark with ID {} not found".format(facility_id)
+            status_code=404, detail="Carpark with ID {} not found".format(facility_id)
         )
 
     # Get the total spots and occupancy
@@ -126,14 +123,9 @@ async def get_carpark_available_details(
         occupancy = int(details.get("occupancy", {}).get("total", 0))
     except (TypeError, ValueError) as e:
         logger.error(
-            "Invalid spot or occupancy data for carpark {}: {}".format(
-                facility_id, e
-            )
+            "Invalid spot or occupancy data for carpark {}: {}".format(facility_id, e)
         )
-        raise HTTPException(
-            status_code=500,
-            detail="Internal server error"
-        )
+        raise HTTPException(status_code=500, detail="Internal server error")
 
     # Get the timestamp
     msg_date = details.get("MessageDate")
@@ -142,9 +134,7 @@ async def get_carpark_available_details(
         try:
             timestamp = parse_message_date(msg_date)
         except Exception as e:
-            logger.warning(
-                "Failed to parse MessageDate: {} ({})".format(msg_date, e)
-            )
+            logger.warning("Failed to parse MessageDate: {} ({})".format(msg_date, e))
 
     available_spots = max(total_spots - occupancy, 0)
     status = available_status(total_spots, occupancy)

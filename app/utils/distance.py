@@ -1,12 +1,7 @@
 from math import atan2, cos, radians, sin, sqrt
 
 
-def haversine_distance(
-    lat1: float,
-    lon1: float,
-    lat2: float,
-    lon2: float
-) -> float:
+def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """
     Calculate the distance between two geographical points using the Haversine
     formula.

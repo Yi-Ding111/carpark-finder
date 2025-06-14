@@ -6,12 +6,17 @@ from typing import Dict, Optional, Set
 import requests
 from cachetools import cached
 
-from app.core.config import (MAX_REQUESTS_PER_SECOND,
-                             NSW_TRANSPORT_BASE_API_URL, get_facility_url,
-                             get_nsw_headers)
-from app.services.cache_service import (carpark_ids_cache,
-                                        carpark_locations_cache,
-                                        no_update_carparks_cache)
+from app.core.config import (
+    MAX_REQUESTS_PER_SECOND,
+    NSW_TRANSPORT_BASE_API_URL,
+    get_facility_url,
+    get_nsw_headers,
+)
+from app.services.cache_service import (
+    carpark_ids_cache,
+    carpark_locations_cache,
+    no_update_carparks_cache,
+)
 from app.utils.time_utils import get_local_time, parse_message_date
 
 logger = logging.getLogger(__name__)
@@ -118,15 +123,10 @@ def get_all_carpark_ids() -> Optional[Dict]:
                 ...
             }
     """
-    return make_api_request(
-        url=NSW_TRANSPORT_BASE_API_URL,
-        headers=get_nsw_headers()
-    )
+    return make_api_request(url=NSW_TRANSPORT_BASE_API_URL, headers=get_nsw_headers())
 
 
-def get_carpark_details(
-    facility_id: str, retry_count: int = 3
-) -> Optional[Dict]:
+def get_carpark_details(facility_id: str, retry_count: int = 3) -> Optional[Dict]:
     """
     Get carpark details for a given facility ID with retry logic
 
@@ -183,25 +183,20 @@ def get_carpark_details(
         if attempt > 0:
             logger.info(
                 "Retry {}/{} for facility {}".format(
-                    attempt, retry_count-1, facility_id
+                    attempt, retry_count - 1, facility_id
                 )
             )
         response = make_api_request(
-            url=get_facility_url(facility_id),
-            headers=get_nsw_headers()
+            url=get_facility_url(facility_id), headers=get_nsw_headers()
         )
         if response:
-            logger.info(
-                "API request successful for facility {}".format(facility_id)
-            )
+            logger.info("API request successful for facility {}".format(facility_id))
             return response
     return None
 
 
 def is_carpark_no_update(
-    details: Dict,
-    current_time: datetime,
-    no_update_hours: int = 24
+    details: Dict, current_time: datetime, no_update_hours: int = 24
 ) -> bool:
     """
     Determine if a carpark is considered no update.
@@ -209,7 +204,8 @@ def is_carpark_no_update(
     Parameters:
         details (dict): The carpark details
         current_time (datetime): The current time
-        no_update_hours (int): The number of hours after which the carpark is considered no update
+        no_update_hours (int): The number of hours after which the carpark is
+                              considered no update
 
     Returns:
         bool: True if the carpark is considered no update, False otherwise
@@ -228,10 +224,7 @@ def is_carpark_no_update(
     return age_hours > no_update_hours
 
 
-def fetch_no_update_carparks(
-    carpark_ids: Dict,
-    current_time: datetime
-) -> Set[str]:
+def fetch_no_update_carparks(carpark_ids: Dict, current_time: datetime) -> Set[str]:
     """
     Check all carparks and return the ones that have no update.
 
@@ -315,19 +308,13 @@ def get_carpark_locations() -> Optional[Dict]:
                 "facility_id": facility_id,
                 "name": name,
                 "location": {
-                    "latitude": float(
-                        location.get("latitude")
-                    ),
-                    "longitude": float(
-                        location.get("longitude")
-                    ),
+                    "latitude": float(location.get("latitude")),
+                    "longitude": float(location.get("longitude")),
                 },
             }
             carparks_list.append(carpark)
         except (TypeError, ValueError) as e:
-            logger.error(
-                "Error processing carpark {}: {}".format(facility_id, e)
-            )
+            logger.error("Error processing carpark {}: {}".format(facility_id, e))
             continue
 
     return {"carparks": carparks_list}
