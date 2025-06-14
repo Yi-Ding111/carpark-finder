@@ -46,7 +46,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install bandit safety coverage
+          pip install bandit safety coverage flake8 black isort mypy
       
       # check the security of the code
       - name: Run security checks
