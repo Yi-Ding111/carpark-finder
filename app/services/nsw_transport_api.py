@@ -85,14 +85,14 @@ def make_api_request(url, headers) -> dict | None:
 
     try:
         # Make the API request and increase request_count
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         request_count += 1
 
         # Handle throttle limit exceeded (HTTP 429) by waiting and retrying
         if response.status_code == 429 or response.status_code == 403:
             wait_for_next_second()
             reset_request_counter()
-            response = requests.get(url, headers=headers)
+            response = requests.get(url, headers=headers, timeout=10)
             request_count += 1
 
         # do not return the response if the request fails
