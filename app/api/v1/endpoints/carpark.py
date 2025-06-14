@@ -74,8 +74,13 @@ async def get_nearby_carparks(
         return sorted(nearby_carparks, key=lambda x: x.distance_km)
 
     except Exception as e:
-        logger.error(f"Error in get_nearby_carparks: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        logger.error(
+            "Error in get_nearby_carparks: {}".format(str(e))
+        )
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error"
+        )
 
 
 @router.get("/{facility_id}", response_model=CarparkDetail)

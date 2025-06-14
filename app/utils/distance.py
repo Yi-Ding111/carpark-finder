@@ -8,13 +8,16 @@ def haversine_distance(
     lon2: float
 ) -> float:
     """
-    Calculate the distance between two geographical points using the Haversine formula.
+    Calculate the distance between two geographical points using the Haversine
+    formula.
 
     Parameters:
         lat1 (float): Latitude of the first point (my location) in decimal degrees
         lon1 (float): Longitude of the first point (my location) in decimal degrees
-        lat2 (float): Latitude of the second point (carpark location) in decimal degrees
-        lon2 (float): Longitude of the second point (carpark location) in decimal degrees
+        lat2 (float): Latitude of the second point (carpark location) in decimal
+                     degrees
+        lon2 (float): Longitude of the second point (carpark location) in decimal
+                     degrees
 
     Returns:
         float: The distance between the two points in kilometers

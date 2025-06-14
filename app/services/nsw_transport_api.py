@@ -110,14 +110,18 @@ def get_all_carpark_ids() -> Optional[Dict]:
     Query all carparks information from the NSW Transport API.
 
     Returns:
-        dict: Dictionary mapping facility IDs to facility names, or None if request fails
+        dict: Dictionary mapping facility IDs to facility names,
+              or None if request fails
         API response example:
             {
                 "facility_id": "facility_name"
                 ...
             }
     """
-    return make_api_request(url=NSW_TRANSPORT_BASE_API_URL, headers=get_nsw_headers())
+    return make_api_request(
+        url=NSW_TRANSPORT_BASE_API_URL,
+        headers=get_nsw_headers()
+    )
 
 
 def get_carpark_details(
@@ -187,7 +191,9 @@ def get_carpark_details(
             headers=get_nsw_headers()
         )
         if response:
-            logger.info(f"API request successful for facility {facility_id}")
+            logger.info(
+                "API request successful for facility {}".format(facility_id)
+            )
             return response
     return None
 
@@ -238,11 +244,11 @@ def fetch_no_update_carparks(
     """
     no_update_set = set()
     for facility_id, _ in carpark_ids.items():
-        logger.debug(f"Checking facility {facility_id}...")
+        logger.debug("Checking facility {}...".format(facility_id))
         details = get_carpark_details(facility_id)
         if not details or is_carpark_no_update(details, current_time):
             no_update_set.add(str(facility_id))
-            logger.info(f"Facility {facility_id} is no-update")
+            logger.info("Facility {} is no-update".format(facility_id))
     return no_update_set
 
 
