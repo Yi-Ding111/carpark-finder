@@ -14,9 +14,6 @@ venv/
 dev/
 task/
 
-# GitHub
-.github/
-
 # logs
 logs/
 
