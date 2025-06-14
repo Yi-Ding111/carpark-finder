@@ -11,9 +11,7 @@ from app.main import app
 
 
 @pytest.mark.asyncio
-async def test_get_nearby_carparks_success(
-    async_test_client, mock_carpark_locations, mock_headers, mock_api_key
-):
+async def test_get_nearby_carparks_success(async_test_client, mock_carpark_locations, mock_headers, mock_api_key):
     """
     Test the get_nearby_carparks endpoint.
 
@@ -55,9 +53,7 @@ async def test_get_nearby_carparks_success(
 
 
 @pytest.mark.asyncio
-async def test_get_nearby_carparks_no_results(
-    async_test_client, mock_headers, mock_api_key
-):
+async def test_get_nearby_carparks_no_results(async_test_client, mock_headers, mock_api_key):
     """
     Test the get_nearby_carparks endpoint.
 
@@ -111,9 +107,7 @@ async def test_get_nearby_carparks_invalid_api_key(async_test_client, mock_heade
 
 
 @pytest.mark.asyncio
-async def test_get_nearby_carparks_invalid_data_structure(
-    async_test_client, mock_headers, mock_api_key
-):
+async def test_get_nearby_carparks_invalid_data_structure(async_test_client, mock_headers, mock_api_key):
     """
     Test the get_nearby_carparks endpoint.
 
@@ -142,9 +136,7 @@ async def test_get_nearby_carparks_invalid_data_structure(
 
 
 @pytest.mark.asyncio
-async def test_get_nearby_carparks_internal_server_error(
-    async_test_client, mock_api_key, mock_headers
-):
+async def test_get_nearby_carparks_internal_server_error(async_test_client, mock_api_key, mock_headers):
     """
     Test the get_nearby_carparks endpoint.
 
@@ -201,9 +193,7 @@ async def test_get_carpark_available_details_success(
             "app.api.v1.endpoints.carpark.get_carpark_details",
             return_value=mock_carpark_details,
         ),
-        patch(
-            "app.api.v1.endpoints.carpark.get_no_update_carparks", return_value=set()
-        ),
+        patch("app.api.v1.endpoints.carpark.get_no_update_carparks", return_value=set()),
     ):
 
         response = await async_test_client.get("/carparks/111", headers=mock_headers)
@@ -220,9 +210,7 @@ async def test_get_carpark_available_details_success(
 
 
 @pytest.mark.asyncio
-async def test_get_carpark_available_details_invalid_api_key(
-    async_test_client, mock_headers
-):
+async def test_get_carpark_available_details_invalid_api_key(async_test_client, mock_headers):
     """
     Test the get_carpark_available_details endpoint.
 
@@ -246,9 +234,7 @@ async def test_get_carpark_available_details_invalid_api_key(
 
 
 @pytest.mark.asyncio
-async def test_get_carpark_available_details_no_update(
-    async_test_client, mock_api_key, mock_headers
-):
+async def test_get_carpark_available_details_no_update(async_test_client, mock_api_key, mock_headers):
     """
     Test the get_carpark_available_details endpoint.
 
@@ -263,9 +249,7 @@ async def test_get_carpark_available_details_no_update(
     """
     app.dependency_overrides[verify_api_key] = lambda: mock_api_key
 
-    with patch(
-        "app.api.v1.endpoints.carpark.get_no_update_carparks", return_value={"222"}
-    ):
+    with patch("app.api.v1.endpoints.carpark.get_no_update_carparks", return_value={"222"}):
         response = await async_test_client.get("/carparks/222", headers=mock_headers)
 
     assert response.status_code == 200
@@ -278,9 +262,7 @@ async def test_get_carpark_available_details_no_update(
 
 
 @pytest.mark.asyncio
-async def test_get_carpark_available_details_not_found(
-    async_test_client, mock_api_key, mock_headers
-):
+async def test_get_carpark_available_details_not_found(async_test_client, mock_api_key, mock_headers):
     """
     Test the get_carpark_available_details endpoint.
 
@@ -297,9 +279,7 @@ async def test_get_carpark_available_details_not_found(
 
     with (
         patch("app.api.v1.endpoints.carpark.get_carpark_details", return_value=None),
-        patch(
-            "app.api.v1.endpoints.carpark.get_no_update_carparks", return_value=set()
-        ),
+        patch("app.api.v1.endpoints.carpark.get_no_update_carparks", return_value=set()),
     ):
         response = await async_test_client.get("/carparks/000", headers=mock_headers)
 
@@ -332,9 +312,7 @@ async def test_get_carpark_available_details_invalid_data(
     mock_carpark_details["spots"] = "invalid"
 
     with (
-        patch(
-            "app.api.v1.endpoints.carpark.get_no_update_carparks", return_value=set()
-        ),
+        patch("app.api.v1.endpoints.carpark.get_no_update_carparks", return_value=set()),
         patch(
             "app.api.v1.endpoints.carpark.get_carpark_details",
             return_value=mock_carpark_details,

@@ -181,23 +181,15 @@ def get_carpark_details(facility_id: str, retry_count: int = 3) -> Optional[Dict
 
     for attempt in range(retry_count):
         if attempt > 0:
-            logger.info(
-                "Retry {}/{} for facility {}".format(
-                    attempt, retry_count - 1, facility_id
-                )
-            )
-        response = make_api_request(
-            url=get_facility_url(facility_id), headers=get_nsw_headers()
-        )
+            logger.info("Retry {}/{} for facility {}".format(attempt, retry_count - 1, facility_id))
+        response = make_api_request(url=get_facility_url(facility_id), headers=get_nsw_headers())
         if response:
             logger.info("API request successful for facility {}".format(facility_id))
             return response
     return None
 
 
-def is_carpark_no_update(
-    details: Dict, current_time: datetime, no_update_hours: int = 24
-) -> bool:
+def is_carpark_no_update(details: Dict, current_time: datetime, no_update_hours: int = 24) -> bool:
     """
     Determine if a carpark is considered no update.
 

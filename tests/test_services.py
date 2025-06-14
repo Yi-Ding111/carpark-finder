@@ -156,9 +156,7 @@ def test_make_api_request_rate_limit(mock_url, mock_headers, mock_success_respon
         assert result == {"result": "ok"}
 
 
-def test_make_api_request_throttle_limit_and_reset(
-    mock_url, mock_headers, mock_success_response
-):
+def test_make_api_request_throttle_limit_and_reset(mock_url, mock_headers, mock_success_response):
     """
     Test the make_api_request function.
 
@@ -250,21 +248,15 @@ def test_get_carpark_details_success(mock_carpark_details, mock_url, mock_header
             return_value=mock_carpark_details,
         ),
         patch("app.services.nsw_transport_api.get_facility_url", return_value=mock_url),
-        patch(
-            "app.services.nsw_transport_api.get_nsw_headers", return_value=mock_headers
-        ),
+        patch("app.services.nsw_transport_api.get_nsw_headers", return_value=mock_headers),
     ):
 
-        result = nsw_transport_api.get_carpark_details(
-            mock_carpark_details["facility_id"]
-        )
+        result = nsw_transport_api.get_carpark_details(mock_carpark_details["facility_id"])
 
         assert result == mock_carpark_details
 
 
-def test_get_carpark_details_retry_success(
-    mock_carpark_details, mock_url, mock_headers
-):
+def test_get_carpark_details_retry_success(mock_carpark_details, mock_url, mock_headers):
     """
     Test the get_carpark_details function.
 
@@ -284,14 +276,10 @@ def test_get_carpark_details_retry_success(
             side_effect=[None, mock_carpark_details],
         ),
         patch("app.services.nsw_transport_api.get_facility_url", return_value=mock_url),
-        patch(
-            "app.services.nsw_transport_api.get_nsw_headers", return_value=mock_headers
-        ),
+        patch("app.services.nsw_transport_api.get_nsw_headers", return_value=mock_headers),
     ):
 
-        result = nsw_transport_api.get_carpark_details(
-            mock_carpark_details["facility_id"], retry_count=3
-        )
+        result = nsw_transport_api.get_carpark_details(mock_carpark_details["facility_id"], retry_count=3)
 
         assert result == mock_carpark_details
 
@@ -309,9 +297,7 @@ def test_get_carpark_details_all_fail(mock_url, mock_headers):
     with (
         patch("app.services.nsw_transport_api.make_api_request", return_value=None),
         patch("app.services.nsw_transport_api.get_facility_url", return_value=mock_url),
-        patch(
-            "app.services.nsw_transport_api.get_nsw_headers", return_value=mock_headers
-        ),
+        patch("app.services.nsw_transport_api.get_nsw_headers", return_value=mock_headers),
     ):
 
         result = nsw_transport_api.get_carpark_details("999", retry_count=3)
@@ -328,9 +314,7 @@ def test_no_message_date(mock_sydney_local_time):
     Parameters:
         mock_sydney_local_time: the mock sydney local time
     """
-    assert (
-        is_carpark_no_update({}, datetime.fromisoformat(mock_sydney_local_time)) is True
-    )
+    assert is_carpark_no_update({}, datetime.fromisoformat(mock_sydney_local_time)) is True
 
 
 def test_invalid_message_date(mock_sydney_local_time):
@@ -340,10 +324,7 @@ def test_invalid_message_date(mock_sydney_local_time):
     This test verifies that the is_carpark_no_update function could return True when the message date is invalid.
     """
     details = {"MessageDate": "invalid-date-format"}
-    assert (
-        is_carpark_no_update(details, datetime.fromisoformat(mock_sydney_local_time))
-        is True
-    )
+    assert is_carpark_no_update(details, datetime.fromisoformat(mock_sydney_local_time)) is True
 
 
 def test_recent_update(mock_sydney_local_time, mock_carpark_details):
@@ -357,18 +338,11 @@ def test_recent_update(mock_sydney_local_time, mock_carpark_details):
         mock_carpark_details: the mock carpark details
     """
     # the format should follow the result from get_local_time()
-    current_time = pytz.timezone("Australia/Sydney").localize(
-        datetime.fromisoformat(mock_sydney_local_time)
-    )
-    assert (
-        is_carpark_no_update(mock_carpark_details, current_time, no_update_hours=24)
-        is False
-    )
+    current_time = pytz.timezone("Australia/Sydney").localize(datetime.fromisoformat(mock_sydney_local_time))
+    assert is_carpark_no_update(mock_carpark_details, current_time, no_update_hours=24) is False
 
 
-def test_fetch_no_update_carparks_all_stale(
-    mock_all_carparks_response, mock_sydney_local_time, mock_carpark_details
-):
+def test_fetch_no_update_carparks_all_stale(mock_all_carparks_response, mock_sydney_local_time, mock_carpark_details):
     """
     Test the fetch_no_update_carparks function.
 
@@ -381,9 +355,7 @@ def test_fetch_no_update_carparks_all_stale(
         mock_carpark_details: the mock carpark details
     """
     # the format should follow the result from get_local_time()
-    current_time = pytz.timezone("Australia/Sydney").localize(
-        datetime.fromisoformat(mock_sydney_local_time)
-    )
+    current_time = pytz.timezone("Australia/Sydney").localize(datetime.fromisoformat(mock_sydney_local_time))
     # the all_carpark_ids should be the keys of the mock_all_carparks_response
     all_carpark_ids = {id for id in mock_all_carparks_response.keys()}
 
@@ -402,9 +374,7 @@ def test_fetch_no_update_carparks_all_stale(
         assert result == all_carpark_ids
 
 
-def test_fetch_no_update_carparks_mixed(
-    mock_all_carparks_response, mock_sydney_local_time
-):
+def test_fetch_no_update_carparks_mixed(mock_all_carparks_response, mock_sydney_local_time):
     """
     Test the fetch_no_update_carparks function.
 
@@ -417,9 +387,7 @@ def test_fetch_no_update_carparks_mixed(
     """
 
     # the format should follow the result from get_local_time()
-    current_time = pytz.timezone("Australia/Sydney").localize(
-        datetime.fromisoformat(mock_sydney_local_time)
-    )
+    current_time = pytz.timezone("Australia/Sydney").localize(datetime.fromisoformat(mock_sydney_local_time))
     # the all_carpark_ids should be the keys of the mock_all_carparks_response
     with (
         patch("app.services.nsw_transport_api.get_carpark_details") as mock_get,
@@ -439,9 +407,7 @@ def test_fetch_no_update_carparks_mixed(
         assert mock_is_stale.call_count == 3
 
 
-def test_fetch_no_update_carparks_no_stale(
-    mock_all_carparks_response, mock_sydney_local_time, mock_carpark_details
-):
+def test_fetch_no_update_carparks_no_stale(mock_all_carparks_response, mock_sydney_local_time, mock_carpark_details):
     """
     Test the fetch_no_update_carparks function.
 
@@ -454,9 +420,7 @@ def test_fetch_no_update_carparks_no_stale(
         mock_carpark_details: the mock carpark details
     """
     # the format should follow the result from get_local_time()
-    current_time = pytz.timezone("Australia/Sydney").localize(
-        datetime.fromisoformat(mock_sydney_local_time)
-    )
+    current_time = pytz.timezone("Australia/Sydney").localize(datetime.fromisoformat(mock_sydney_local_time))
 
     # is_carpark_no_update should return False for all carpark details
     # False result means the carpark is all update
@@ -465,9 +429,7 @@ def test_fetch_no_update_carparks_no_stale(
             "app.services.nsw_transport_api.get_carpark_details",
             return_value=mock_carpark_details,
         ),
-        patch(
-            "app.services.nsw_transport_api.is_carpark_no_update", return_value=False
-        ),
+        patch("app.services.nsw_transport_api.is_carpark_no_update", return_value=False),
     ):
 
         result = fetch_no_update_carparks(mock_all_carparks_response, current_time)
@@ -507,9 +469,7 @@ def test_get_no_update_carparks_cache(mock_all_carparks_response):
         assert mock_fetch.call_count == 1
 
 
-def test_get_carpark_locations_cache(
-    mock_carpark_details, mock_all_carparks_response, mock_carpark_locations
-):
+def test_get_carpark_locations_cache(mock_carpark_details, mock_all_carparks_response, mock_carpark_locations):
     """
     Test the get_carpark_locations function.
 
