@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, HTTPException, Query, Depends, Path
 from app.core.security import verify_api_key
 from app.models.schemas import Carpark, CarparkDetail
 from app.services.nsw_transport_api import (
@@ -80,7 +80,7 @@ async def get_nearby_carparks(
 
 @router.get("/{facility_id}", response_model=CarparkDetail)
 async def get_carpark_available_details(
-    facility_id: str, api_key: str = Depends(verify_api_key)
+    facility_id: str= Path(..., pattern="^\d+$"), api_key: str = Depends(verify_api_key)
 ):
     """
     Get detailed information about a specific carpark

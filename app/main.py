@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from app.api.v1.endpoints import carpark
 from app.core.logging_config import setup_logging
-import logging
+import yaml
 
 # Initialize logging
 logger = setup_logging()
@@ -15,17 +15,34 @@ app = FastAPI(
     version="1.0.0",
 )
 
+
+# Load custom OpenAPI schema
+def custom_openapi():
+    """
+    Custom OpenAPI schema
+    """
+    if app.openapi_schema:
+        return app.openapi_schema
+    with open("openapi/openapi.yaml", "r") as f:
+        openapi_dict = yaml.safe_load(f)
+        app.openapi_schema = openapi_dict
+        return app.openapi_schema
+
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # This project is not for production, so we allow all origins
+    allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
-    allow_headers=["X-API-Key"],  # This is the header name for the API key
+    allow_headers=["X-API-Key"],
 )
 
 # Include routers
 app.include_router(carpark.router, prefix="/carparks", tags=["carparks"])
+
+# Custom OpenAPI schema
+app.openapi = custom_openapi
 
 
 @app.get("/")
