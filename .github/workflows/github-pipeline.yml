@@ -12,6 +12,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    environment: carpark_finder
     # run the test on different python versions
     strategy:
       matrix:
