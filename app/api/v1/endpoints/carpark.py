@@ -65,7 +65,9 @@ async def get_nearby_carparks(
 
             except (TypeError, ValueError) as e:
                 logger.error(
-                    f"Error processing carpark {carpark.get('facility_id')}: {e}"
+                    "Error processing carpark {}: {}".format(
+                        carpark.get('facility_id'), e
+                    )
                 )
                 continue
 

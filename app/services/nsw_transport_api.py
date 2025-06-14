@@ -120,16 +120,20 @@ def get_all_carpark_ids() -> Optional[Dict]:
     return make_api_request(url=NSW_TRANSPORT_BASE_API_URL, headers=get_nsw_headers())
 
 
-def get_carpark_details(facility_id: str, retry_count: int = 3) -> Optional[Dict]:
+def get_carpark_details(
+    facility_id: str, retry_count: int = 3
+) -> Optional[Dict]:
     """
     Get carpark details for a given facility ID with retry logic
 
     Parameters:
         facility_id (str): The ID of the carpark facility to query
-        retry_count (int, optional): Number of retry attempts if request fails. Defaults to 3.
+        retry_count (int, optional): Number of retry attempts if request fails.
+                                   Defaults to 3.
 
     Returns:
-        dict: JSON response containing carpark details if successful, None if all retries fail
+        dict: JSON response containing carpark details if successful,
+              None if all retries fail
 
         {
             "tsn":,
@@ -173,9 +177,14 @@ def get_carpark_details(facility_id: str, retry_count: int = 3) -> Optional[Dict
 
     for attempt in range(retry_count):
         if attempt > 0:
-            logger.info(f"Retry {attempt}/{retry_count-1} for facility {facility_id}")
+            logger.info(
+                "Retry {}/{} for facility {}".format(
+                    attempt, retry_count-1, facility_id
+                )
+            )
         response = make_api_request(
-            url=get_facility_url(facility_id), headers=get_nsw_headers()
+            url=get_facility_url(facility_id),
+            headers=get_nsw_headers()
         )
         if response:
             logger.info(f"API request successful for facility {facility_id}")
@@ -184,7 +193,9 @@ def get_carpark_details(facility_id: str, retry_count: int = 3) -> Optional[Dict
 
 
 def is_carpark_no_update(
-    details: Dict, current_time: datetime, no_update_hours: int = 24
+    details: Dict,
+    current_time: datetime,
+    no_update_hours: int = 24
 ) -> bool:
     """
     Determine if a carpark is considered no update.
@@ -211,7 +222,10 @@ def is_carpark_no_update(
     return age_hours > no_update_hours
 
 
-def fetch_no_update_carparks(carpark_ids: Dict, current_time: datetime) -> Set[str]:
+def fetch_no_update_carparks(
+    carpark_ids: Dict,
+    current_time: datetime
+) -> Set[str]:
     """
     Check all carparks and return the ones that have no update.
 
@@ -257,11 +271,15 @@ def get_carpark_locations() -> Optional[Dict]:
             {
                 "carparks": [
                     {
-                        "facility_id":,
-                        "name":,
-                        "location":{
-                            "latitude":,
-                            "longitude":
+                        "facility_id": str,
+                        "name": str,
+                        "location": {
+                            "latitude": float,
+                            "longitude": float
+                        }
+                    }
+                ]
+            }
     """
 
     # Get mapping of facility IDs to names
