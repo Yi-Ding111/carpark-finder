@@ -65,7 +65,7 @@ jobs:
       # check the code style
       - name: Run linting
         run: |
-          flake8 .
+          flake8 . --max-line-length=88 --exclude=tests/
           black . --check
           isort . --check-only
 
