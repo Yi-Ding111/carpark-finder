@@ -10,7 +10,7 @@ on:
       - master
 
 jobs:
-  test:
+  api-unit-test:
     runs-on: ubuntu-latest
     environment: carpark_finder
     # run the test on different python versions
@@ -87,3 +87,23 @@ jobs:
         with:
           name: full-coverage-report
           path: htmlcov/
+
+
+  deploy-coverage-report:
+    needs: api-unit-test  
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/yd'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download coverage HTML report
+        uses: actions/download-artifact@v4
+        with:
+          name: full-coverage-report
+          path: htmlcov/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./htmlcov
