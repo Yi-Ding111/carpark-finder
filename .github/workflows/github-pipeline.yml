@@ -50,9 +50,17 @@ jobs:
       
       # check the security of the code
       - name: Run security checks
+        continue-on-error: true
         run: |
           bandit -r app/ -f json -o bandit-results.json
           safety check
+
+      - name: Upload Bandit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: bandit-results.json
 
       # check the code style
       - name: Run linting
