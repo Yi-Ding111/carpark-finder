@@ -315,13 +315,19 @@ def get_carpark_locations() -> Optional[Dict]:
                 "facility_id": facility_id,
                 "name": name,
                 "location": {
-                    "latitude": float(location.get("latitude")),
-                    "longitude": float(location.get("longitude")),
+                    "latitude": float(
+                        location.get("latitude")
+                    ),
+                    "longitude": float(
+                        location.get("longitude")
+                    ),
                 },
             }
             carparks_list.append(carpark)
         except (TypeError, ValueError) as e:
-            logger.error(f"Error processing carpark {facility_id}: {e}")
+            logger.error(
+                "Error processing carpark {}: {}".format(facility_id, e)
+            )
             continue
 
     return {"carparks": carparks_list}

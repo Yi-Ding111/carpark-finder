@@ -116,7 +116,8 @@ async def get_carpark_available_details(
     # If the carpark is not found, return a 404 error
     if not details:
         raise HTTPException(
-            status_code=404, detail=f"Carpark with ID {facility_id} not found"
+            status_code=404,
+            detail="Carpark with ID {} not found".format(facility_id)
         )
 
     # Get the total spots and occupancy
@@ -124,8 +125,15 @@ async def get_carpark_available_details(
         total_spots = int(details.get("spots", 0))
         occupancy = int(details.get("occupancy", {}).get("total", 0))
     except (TypeError, ValueError) as e:
-        logger.error(f"Invalid spot or occupancy data for carpark {facility_id}: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        logger.error(
+            "Invalid spot or occupancy data for carpark {}: {}".format(
+                facility_id, e
+            )
+        )
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error"
+        )
 
     # Get the timestamp
     msg_date = details.get("MessageDate")
@@ -134,7 +142,9 @@ async def get_carpark_available_details(
         try:
             timestamp = parse_message_date(msg_date)
         except Exception as e:
-            logger.warning(f"Failed to parse MessageDate: {msg_date} ({e})")
+            logger.warning(
+                "Failed to parse MessageDate: {} ({})".format(msg_date, e)
+            )
 
     available_spots = max(total_spots - occupancy, 0)
     status = available_status(total_spots, occupancy)
