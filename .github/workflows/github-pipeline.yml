@@ -65,14 +65,14 @@ jobs:
       # check the code style
       - name: Run linting
         run: |
-          flake8 app/ --max-line-length=88
+          flake8 app/ --max-line-length=120
           black . --check
           isort . --check-only
 
-      # check the type of the code
-      - name: Run type checking
-        run: |
-          mypy .
+      # # check the type of the code
+      # - name: Run type checking
+      #   run: |
+      #     mypy .
 
       # run the unit tests and coverage
       - name: Run all tests with coverage

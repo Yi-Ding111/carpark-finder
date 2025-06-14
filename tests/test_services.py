@@ -14,12 +14,14 @@ import requests
 
 from app.core import config
 from app.services import nsw_transport_api
-from app.services.nsw_transport_api import (available_status,
-                                            fetch_no_update_carparks,
-                                            get_all_carpark_ids,
-                                            get_carpark_locations,
-                                            get_no_update_carparks,
-                                            is_carpark_no_update)
+from app.services.nsw_transport_api import (
+    available_status,
+    fetch_no_update_carparks,
+    get_all_carpark_ids,
+    get_carpark_locations,
+    get_no_update_carparks,
+    is_carpark_no_update,
+)
 
 
 def test_reset_request_counter():
@@ -76,9 +78,10 @@ def test_wait_for_next_second_calls_sleep():
     expected_sleep_time = 1.0 - (fake_time - int(fake_time))  # 0.7
 
     # mock the time.time() to 100.3
-    with patch(
-        "app.services.nsw_transport_api.time.time", return_value=fake_time
-    ), patch("app.services.nsw_transport_api.time.sleep") as mock_sleep:
+    with (
+        patch("app.services.nsw_transport_api.time.time", return_value=fake_time),
+        patch("app.services.nsw_transport_api.time.sleep") as mock_sleep,
+    ):
 
         nsw_transport_api.wait_for_next_second()
 
@@ -105,11 +108,13 @@ def test_make_api_request_success(mock_url, mock_headers, mock_success_response)
     # mock the get request to return the mock response
     # mock the reset_request_counter as null function,do nothing
     # mock the wait_for_next_second as null function,do nothing
-    with patch(
-        "app.services.nsw_transport_api.requests.get",
-        return_value=mock_success_response,
-    ), patch("app.services.nsw_transport_api.reset_request_counter"), patch(
-        "app.services.nsw_transport_api.wait_for_next_second"
+    with (
+        patch(
+            "app.services.nsw_transport_api.requests.get",
+            return_value=mock_success_response,
+        ),
+        patch("app.services.nsw_transport_api.reset_request_counter"),
+        patch("app.services.nsw_transport_api.wait_for_next_second"),
     ):
 
         result = nsw_transport_api.make_api_request(mock_url, mock_headers)
@@ -137,11 +142,13 @@ def test_make_api_request_rate_limit(mock_url, mock_headers, mock_success_respon
     mock_response_429.json.return_value = {}
 
     # do the side effect, first return 429, then return 200
-    with patch(
-        "app.services.nsw_transport_api.requests.get",
-        side_effect=[mock_response_429, mock_success_response],
-    ), patch("app.services.nsw_transport_api.reset_request_counter"), patch(
-        "app.services.nsw_transport_api.wait_for_next_second"
+    with (
+        patch(
+            "app.services.nsw_transport_api.requests.get",
+            side_effect=[mock_response_429, mock_success_response],
+        ),
+        patch("app.services.nsw_transport_api.reset_request_counter"),
+        patch("app.services.nsw_transport_api.wait_for_next_second"),
     ):
 
         result = nsw_transport_api.make_api_request(mock_url, mock_headers)
@@ -237,13 +244,15 @@ def test_get_carpark_details_success(mock_carpark_details, mock_url, mock_header
         mock_headers: the mock headers
     """
 
-    with patch(
-        "app.services.nsw_transport_api.make_api_request",
-        return_value=mock_carpark_details,
-    ), patch(
-        "app.services.nsw_transport_api.get_facility_url", return_value=mock_url
-    ), patch(
-        "app.services.nsw_transport_api.get_nsw_headers", return_value=mock_headers
+    with (
+        patch(
+            "app.services.nsw_transport_api.make_api_request",
+            return_value=mock_carpark_details,
+        ),
+        patch("app.services.nsw_transport_api.get_facility_url", return_value=mock_url),
+        patch(
+            "app.services.nsw_transport_api.get_nsw_headers", return_value=mock_headers
+        ),
     ):
 
         result = nsw_transport_api.get_carpark_details(
@@ -269,13 +278,15 @@ def test_get_carpark_details_retry_success(
 
     # First call returns None, second call returns response
     # mock the make_api_request function to return None, then return the mock response
-    with patch(
-        "app.services.nsw_transport_api.make_api_request",
-        side_effect=[None, mock_carpark_details],
-    ), patch(
-        "app.services.nsw_transport_api.get_facility_url", return_value=mock_url
-    ), patch(
-        "app.services.nsw_transport_api.get_nsw_headers", return_value=mock_headers
+    with (
+        patch(
+            "app.services.nsw_transport_api.make_api_request",
+            side_effect=[None, mock_carpark_details],
+        ),
+        patch("app.services.nsw_transport_api.get_facility_url", return_value=mock_url),
+        patch(
+            "app.services.nsw_transport_api.get_nsw_headers", return_value=mock_headers
+        ),
     ):
 
         result = nsw_transport_api.get_carpark_details(
@@ -295,12 +306,12 @@ def test_get_carpark_details_all_fail(mock_url, mock_headers):
         mock_url: the mock url
         mock_headers: the mock headers
     """
-    with patch(
-        "app.services.nsw_transport_api.make_api_request", return_value=None
-    ), patch(
-        "app.services.nsw_transport_api.get_facility_url", return_value=mock_url
-    ), patch(
-        "app.services.nsw_transport_api.get_nsw_headers", return_value=mock_headers
+    with (
+        patch("app.services.nsw_transport_api.make_api_request", return_value=None),
+        patch("app.services.nsw_transport_api.get_facility_url", return_value=mock_url),
+        patch(
+            "app.services.nsw_transport_api.get_nsw_headers", return_value=mock_headers
+        ),
     ):
 
         result = nsw_transport_api.get_carpark_details("999", retry_count=3)
@@ -378,10 +389,13 @@ def test_fetch_no_update_carparks_all_stale(
 
     # is_carpark_no_update should return True for all carpark details
     # True result means the carpark is no update
-    with patch(
-        "app.services.nsw_transport_api.get_carpark_details",
-        return_value=mock_carpark_details,
-    ), patch("app.services.nsw_transport_api.is_carpark_no_update", return_value=True):
+    with (
+        patch(
+            "app.services.nsw_transport_api.get_carpark_details",
+            return_value=mock_carpark_details,
+        ),
+        patch("app.services.nsw_transport_api.is_carpark_no_update", return_value=True),
+    ):
 
         result = fetch_no_update_carparks(mock_all_carparks_response, current_time)
 
@@ -407,9 +421,10 @@ def test_fetch_no_update_carparks_mixed(
         datetime.fromisoformat(mock_sydney_local_time)
     )
     # the all_carpark_ids should be the keys of the mock_all_carparks_response
-    with patch("app.services.nsw_transport_api.get_carpark_details") as mock_get, patch(
-        "app.services.nsw_transport_api.is_carpark_no_update"
-    ) as mock_is_stale:
+    with (
+        patch("app.services.nsw_transport_api.get_carpark_details") as mock_get,
+        patch("app.services.nsw_transport_api.is_carpark_no_update") as mock_is_stale,
+    ):
 
         # return the mock carpark details
         mock_get.side_effect = lambda fid: {"facility_id": fid}
@@ -445,10 +460,15 @@ def test_fetch_no_update_carparks_no_stale(
 
     # is_carpark_no_update should return False for all carpark details
     # False result means the carpark is all update
-    with patch(
-        "app.services.nsw_transport_api.get_carpark_details",
-        return_value=mock_carpark_details,
-    ), patch("app.services.nsw_transport_api.is_carpark_no_update", return_value=False):
+    with (
+        patch(
+            "app.services.nsw_transport_api.get_carpark_details",
+            return_value=mock_carpark_details,
+        ),
+        patch(
+            "app.services.nsw_transport_api.is_carpark_no_update", return_value=False
+        ),
+    ):
 
         result = fetch_no_update_carparks(mock_all_carparks_response, current_time)
 
@@ -465,12 +485,16 @@ def test_get_no_update_carparks_cache(mock_all_carparks_response):
         mock_all_carparks_response: the mock all carpark ids response
     """
     # mock the make_api_request function to return the mock response
-    with patch(
-        "app.services.nsw_transport_api.get_all_carpark_ids",
-        return_value=mock_all_carparks_response,
-    ) as mock_api, patch(
-        "app.services.nsw_transport_api.fetch_no_update_carparks", return_value=set()
-    ) as mock_fetch:
+    with (
+        patch(
+            "app.services.nsw_transport_api.get_all_carpark_ids",
+            return_value=mock_all_carparks_response,
+        ) as mock_api,
+        patch(
+            "app.services.nsw_transport_api.fetch_no_update_carparks",
+            return_value=set(),
+        ) as mock_fetch,
+    ):
         # first call: should call get_all_carpark_ids and fetch_no_update_carparks
         result1 = get_no_update_carparks()
         assert result1 == set()
@@ -498,16 +522,20 @@ def test_get_carpark_locations_cache(
     """
     # mock the get_carpark_details function to return the mock response
     # "222" and "333" are no-update
-    with patch(
-        "app.services.nsw_transport_api.get_carpark_details",
-        return_value=mock_carpark_details,
-    ) as mock_carpark_details, patch(
-        "app.services.nsw_transport_api.get_all_carpark_ids",
-        return_value=mock_all_carparks_response,
-    ) as mock_all_carpark_ids, patch(
-        "app.services.nsw_transport_api.get_no_update_carparks",
-        return_value={"222", "333"},
-    ) as mock_no_update_carparks:
+    with (
+        patch(
+            "app.services.nsw_transport_api.get_carpark_details",
+            return_value=mock_carpark_details,
+        ) as mock_carpark_details,
+        patch(
+            "app.services.nsw_transport_api.get_all_carpark_ids",
+            return_value=mock_all_carparks_response,
+        ) as mock_all_carpark_ids,
+        patch(
+            "app.services.nsw_transport_api.get_no_update_carparks",
+            return_value={"222", "333"},
+        ) as mock_no_update_carparks,
+    ):
         # first call: should call get_carpark_details,get_all_carpark_ids,get_no_update_carparks
         result1 = get_carpark_locations()
         print(result1)

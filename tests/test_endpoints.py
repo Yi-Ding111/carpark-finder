@@ -196,10 +196,15 @@ async def test_get_carpark_available_details_success(
     # patch the get_carpark_details function to return the mock carpark details
     # patch the get_no_update_carparks function to return an empty set
     # patch the available_status function to return "Available"
-    with patch(
-        "app.api.v1.endpoints.carpark.get_carpark_details",
-        return_value=mock_carpark_details,
-    ), patch("app.api.v1.endpoints.carpark.get_no_update_carparks", return_value=set()):
+    with (
+        patch(
+            "app.api.v1.endpoints.carpark.get_carpark_details",
+            return_value=mock_carpark_details,
+        ),
+        patch(
+            "app.api.v1.endpoints.carpark.get_no_update_carparks", return_value=set()
+        ),
+    ):
 
         response = await async_test_client.get("/carparks/111", headers=mock_headers)
 
@@ -290,9 +295,12 @@ async def test_get_carpark_available_details_not_found(
     """
     app.dependency_overrides[verify_api_key] = lambda: mock_api_key
 
-    with patch(
-        "app.api.v1.endpoints.carpark.get_carpark_details", return_value=None
-    ), patch("app.api.v1.endpoints.carpark.get_no_update_carparks", return_value=set()):
+    with (
+        patch("app.api.v1.endpoints.carpark.get_carpark_details", return_value=None),
+        patch(
+            "app.api.v1.endpoints.carpark.get_no_update_carparks", return_value=set()
+        ),
+    ):
         response = await async_test_client.get("/carparks/000", headers=mock_headers)
 
     assert response.status_code == 404
@@ -323,11 +331,14 @@ async def test_get_carpark_available_details_invalid_data(
     # patch the get_carpark_details function to return an invalid data structure
     mock_carpark_details["spots"] = "invalid"
 
-    with patch(
-        "app.api.v1.endpoints.carpark.get_no_update_carparks", return_value=set()
-    ), patch(
-        "app.api.v1.endpoints.carpark.get_carpark_details",
-        return_value=mock_carpark_details,
+    with (
+        patch(
+            "app.api.v1.endpoints.carpark.get_no_update_carparks", return_value=set()
+        ),
+        patch(
+            "app.api.v1.endpoints.carpark.get_carpark_details",
+            return_value=mock_carpark_details,
+        ),
     ):
         response = await async_test_client.get("/carparks/001", headers=mock_headers)
 

@@ -6,6 +6,7 @@ __pycache__/
 .env
 venv/
 .env/
+.pre-commit-config.yaml
 
 # macOS
 .DS_Store
