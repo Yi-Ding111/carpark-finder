@@ -5,12 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query
 
 from app.core.security import verify_api_key
 from app.models.schemas import Carpark, CarparkDetail
-from app.services.nsw_transport_api import (
-    available_status,
-    get_carpark_details,
-    get_carpark_locations,
-    get_no_update_carparks,
-)
+from app.services.nsw_transport_api import (available_status,
+                                            get_carpark_details,
+                                            get_carpark_locations,
+                                            get_no_update_carparks)
 from app.utils.distance import haversine_distance
 from app.utils.time_utils import parse_message_date
 

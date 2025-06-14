@@ -14,14 +14,12 @@ import requests
 
 from app.core import config
 from app.services import nsw_transport_api
-from app.services.nsw_transport_api import (
-    available_status,
-    fetch_no_update_carparks,
-    get_all_carpark_ids,
-    get_carpark_locations,
-    get_no_update_carparks,
-    is_carpark_no_update,
-)
+from app.services.nsw_transport_api import (available_status,
+                                            fetch_no_update_carparks,
+                                            get_all_carpark_ids,
+                                            get_carpark_locations,
+                                            get_no_update_carparks,
+                                            is_carpark_no_update)
 
 
 def test_reset_request_counter():
