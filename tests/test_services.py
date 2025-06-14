@@ -4,9 +4,8 @@
 # check if the functions could handle the error
 # check if the functions could get the correct result
 
-import datetime
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest

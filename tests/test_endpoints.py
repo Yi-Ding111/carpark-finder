@@ -5,8 +5,6 @@
 from unittest.mock import patch
 
 import pytest
-from httpx import AsyncClient
-from httpx._transports.asgi import ASGITransport
 
 from app.api.v1.endpoints.carpark import verify_api_key
 from app.main import app

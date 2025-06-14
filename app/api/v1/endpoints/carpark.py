@@ -78,7 +78,7 @@ async def get_nearby_carparks(
 
 @router.get("/{facility_id}", response_model=CarparkDetail)
 async def get_carpark_available_details(
-    facility_id: str = Path(..., pattern="^\d+$"),
+    facility_id: str = Path(..., pattern=r"^\d+$"),
     api_key: str = Depends(verify_api_key),
 ):
     """

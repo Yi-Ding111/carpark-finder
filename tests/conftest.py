@@ -1,6 +1,6 @@
 # provide mock data for testing
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
