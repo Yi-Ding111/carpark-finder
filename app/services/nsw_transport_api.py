@@ -1,21 +1,18 @@
-import time
-import requests
-from typing import Dict, Set, Optional
-from datetime import datetime
-from cachetools import cached
 import logging
+import time
+from datetime import datetime
+from typing import Dict, Optional, Set
 
-from app.core.config import (
-    MAX_REQUESTS_PER_SECOND,
-    NSW_TRANSPORT_BASE_API_URL,
-)
-from app.services.cache_service import (
-    carpark_ids_cache,
-    carpark_locations_cache,
-    no_update_carparks_cache,
-)
+import requests
+from cachetools import cached
+
+from app.core.config import (MAX_REQUESTS_PER_SECOND,
+                             NSW_TRANSPORT_BASE_API_URL, get_facility_url,
+                             get_nsw_headers)
+from app.services.cache_service import (carpark_ids_cache,
+                                        carpark_locations_cache,
+                                        no_update_carparks_cache)
 from app.utils.time_utils import get_local_time, parse_message_date
-from app.core.config import get_nsw_headers, get_facility_url
 
 logger = logging.getLogger(__name__)
 

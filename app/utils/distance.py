@@ -1,4 +1,4 @@
-from math import radians, sin, cos, sqrt, atan2
+from math import atan2, cos, radians, sin, sqrt
 
 
 def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:

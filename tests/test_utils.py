@@ -1,9 +1,11 @@
-import pytest
 from datetime import datetime, timezone
+
+import pytest
 from pytz import timezone as pytz_timezone
-from app.utils.distance import haversine_distance
-from app.utils.time_utils import parse_message_date, get_local_time
+
 from app.services.nsw_transport_api import available_status
+from app.utils.distance import haversine_distance
+from app.utils.time_utils import get_local_time, parse_message_date
 
 
 def test_haversine_distance():

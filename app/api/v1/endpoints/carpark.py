@@ -1,16 +1,16 @@
+import logging
 from typing import List
-from fastapi import APIRouter, HTTPException, Query, Depends, Path
+
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
+
 from app.core.security import verify_api_key
 from app.models.schemas import Carpark, CarparkDetail
-from app.services.nsw_transport_api import (
-    get_carpark_locations,
-    get_carpark_details,
-    get_no_update_carparks,
-    available_status,
-)
+from app.services.nsw_transport_api import (available_status,
+                                            get_carpark_details,
+                                            get_carpark_locations,
+                                            get_no_update_carparks)
 from app.utils.distance import haversine_distance
 from app.utils.time_utils import parse_message_date
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -26,13 +26,13 @@ async def get_nearby_carparks(
 ):
     """
     Get a list of carparks within the specified radius from a given location.
-    
+
     Parameters:
         lat (float): Latitude of the search point
         lng (float): Longitude of the search point
         radius_km (float): Search radius in kilometers, default is 10km
         api_key (str): API key for authentication
-        
+
     Returns:
         List[Carpark]: List of carpark objects within the radius
     """
@@ -52,9 +52,7 @@ async def get_nearby_carparks(
                 carpark_lat = float(carpark.get("location", {}).get("latitude"))
                 carpark_lon = float(carpark.get("location", {}).get("longitude"))
 
-                distance = haversine_distance(
-                    lat, lng, carpark_lat, carpark_lon
-                )
+                distance = haversine_distance(lat, lng, carpark_lat, carpark_lon)
 
                 if distance <= radius_km:
                     nearby_carparks.append(
@@ -80,15 +78,16 @@ async def get_nearby_carparks(
 
 @router.get("/{facility_id}", response_model=CarparkDetail)
 async def get_carpark_available_details(
-    facility_id: str= Path(..., pattern="^\d+$"), api_key: str = Depends(verify_api_key)
+    facility_id: str = Path(..., pattern="^\d+$"),
+    api_key: str = Depends(verify_api_key),
 ):
     """
     Get detailed information about a specific carpark
-    
+
     Args:
         facility_id (str): ID of the carpark facility
         api_key (str): API key for authentication
-        
+
     Returns:
         dict: Carpark details including total spots, available spots, status and last update
     """
@@ -109,7 +108,9 @@ async def get_carpark_available_details(
 
     # If the carpark is not found, return a 404 error
     if not details:
-        raise HTTPException(status_code=404, detail=f"Carpark with ID {facility_id} not found")
+        raise HTTPException(
+            status_code=404, detail=f"Carpark with ID {facility_id} not found"
+        )
 
     # Get the total spots and occupancy
     try:

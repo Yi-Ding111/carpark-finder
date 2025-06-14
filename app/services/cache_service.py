@@ -1,5 +1,6 @@
 from cachetools import TTLCache
-from app.core.config import CACHE_TTL, CACHE_MAXSIZE
+
+from app.core.config import CACHE_MAXSIZE, CACHE_TTL
 
 # Create cache instances
 carpark_ids_cache = TTLCache(maxsize=CACHE_MAXSIZE, ttl=CACHE_TTL)

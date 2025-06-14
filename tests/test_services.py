@@ -4,23 +4,23 @@
 # check if the functions could handle the error
 # check if the functions could get the correct result
 
-import pytest
-import time
-import requests
 import datetime
+import time
+from datetime import datetime, timedelta
+from unittest.mock import MagicMock, patch
+
+import pytest
 import pytz
-from datetime import timedelta, datetime
-from unittest.mock import patch, MagicMock
-from app.services import nsw_transport_api
+import requests
+
 from app.core import config
-from app.services.nsw_transport_api import (
-    available_status,
-    get_carpark_locations,
-    get_no_update_carparks,
-    get_all_carpark_ids,
-    is_carpark_no_update,
-    fetch_no_update_carparks,
-)
+from app.services import nsw_transport_api
+from app.services.nsw_transport_api import (available_status,
+                                            fetch_no_update_carparks,
+                                            get_all_carpark_ids,
+                                            get_carpark_locations,
+                                            get_no_update_carparks,
+                                            is_carpark_no_update)
 
 
 def test_reset_request_counter():

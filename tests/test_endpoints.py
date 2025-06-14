@@ -2,13 +2,14 @@
 # test get_nearby_carparks
 # test get_carpark_available_details
 
-from app.main import app
-from app.api.v1.endpoints.carpark import verify_api_key
+from unittest.mock import patch
 
+import pytest
 from httpx import AsyncClient
 from httpx._transports.asgi import ASGITransport
-from unittest.mock import patch
-import pytest
+
+from app.api.v1.endpoints.carpark import verify_api_key
+from app.main import app
 
 
 @pytest.mark.asyncio
