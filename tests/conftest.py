@@ -10,6 +10,18 @@ from httpx._transports.asgi import ASGITransport
 from app.main import app
 
 
+@pytest.fixture(autouse=True)
+def reset_rate_limiter():
+    """
+    Reset the rate limiter before each test
+    This is to ensure that the rate limiter is reset before each test
+    and that the rate limiter is not affected by the previous tests
+    """
+    from app.core.rate_limit import rate_limiter
+
+    rate_limiter.requests.clear()
+
+
 @pytest.fixture
 def test_client():
     """
