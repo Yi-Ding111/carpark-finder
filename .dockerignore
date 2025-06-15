@@ -1,0 +1,24 @@
+# Python cache
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+
+# env files
+.env
+.env.*
+
+# Dev/test config
+tests/
+dev/
+run.py
+.pre-commit-config.yaml
+
+# Git and GitHub
+.git/
+.gitignore
+.github/
+
+# Editor and system files
+.vscode/
+.idea/
+.DS_Store
