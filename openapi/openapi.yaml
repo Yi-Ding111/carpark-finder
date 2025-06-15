@@ -80,6 +80,16 @@ paths:
                   detail:
                     type: string
                     example: "The API Key is invalid."
+        "429":
+          description: Too Many Requests - Rate Limit Exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "Too many requests. Please try again in a second."
         "500":
           description: Internal Server Error - Unexpected Error
           content:
@@ -165,6 +175,16 @@ paths:
                   detail:
                     type: string
                     example: "Carpark with ID 111 not found."
+        "429":
+          description: Too Many Requests - Rate Limit Exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "Too many requests. Please try again in a second."
         "500":
           description: Internal Server Error - Unexpected Error
           content:
