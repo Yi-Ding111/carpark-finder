@@ -15,6 +15,7 @@ app = FastAPI(
     title="Carpark Finder API",
     description="It is an API service to find nearby carparks (Park&Ride) in NSW",
     version="1.0.0",
+    root_path="/v1",
 )
 
 

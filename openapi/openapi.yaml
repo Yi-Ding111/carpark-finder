@@ -1,4 +1,8 @@
 openapi: 3.1.0
+servers:
+  - url: /v1
+security:
+  - APIKeyHeader: []
 info:
   title: Carpark Finder API
   description: It is an API service to find nearby carparks (Park&Ride) in NSW
