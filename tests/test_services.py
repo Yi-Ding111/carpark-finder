@@ -517,6 +517,6 @@ def test_available_status():
     """
     # Test different occupancy scenarios
     assert available_status(100, 0) == "Available"
-    assert available_status(100, 80) == "Almost Full"
+    assert available_status(100, 80) == "Available"
     assert available_status(100, 99) == "Almost Full"
     assert available_status(100, 100) == "Full"

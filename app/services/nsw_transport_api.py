@@ -330,7 +330,7 @@ def available_status(spots: int, occupancy: int) -> str:
     available_spots = spots - occupancy
     if available_spots <= 0:
         return "Full"
-    elif available_spots <= spots * 0.2:
+    elif available_spots <= spots * 0.1:
         return "Almost Full"
     else:
         return "Available"

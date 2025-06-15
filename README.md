@@ -1,209 +1,193 @@
 # carpark-finder
 
+A REST API service that helps users find and get real-time information about nearby car parks in NSW. The service provides location-based search, availability data, and detailed carpark information.
 
-## Features
 
-- Find nearby car parks based on location and radius
-- Get detailed information about specific car parks
-- Real-time availability data
-- Rate limiting and caching
-- Secure API access
+## project structure
 
-## Setup
+```
+carpark-finder/
+├── app/                    # Main application package
+│   ├── api/               # API endpoints and route handlers
+│   ├── core/              # Core functionality like security and config
+│   ├── models/            # Pydantic models and data schemas
+│   ├── services/          # External API integrations and business logic
+│   └── utils/             # Helper functions for distance, time etc.
+├── tests/                 # Test files and test utilities
+├── openapi/              # OpenAPI/Swagger specification files
+├── .github/              # GitHub Actions workflows CI/CD
+├── .env.example          # Example environment variables
+├── requirements.txt      # Production dependencies
+├── Dockerfile           # Docker container configuration
+└── run.py               # Application entry point
+```
+
+## Key Features
+
+- Find nearby car parks using location coordinates and radius
+- Real-time availability spots for each carpark
+- Distance calculation using Haversine formula
+- API key authentication
+- Rate limiting and caching for optimal performance
+
+## Quick Start
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/carpark-finder.git
+git clone https://github.com/Yi-Ding111/carpark-finder.git
 cd carpark-finder
 ```
-
-2. Create and activate a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-pip install -r requirements-dev.txt  # For development
-```
-
-4. Copy `.env.example` to `.env` and fill in your configuration:
+2. Configure environment:
 ```bash
 cp .env.example .env
+# Edit .env with your settings
+```
+3. Environment Configuration
+
+The `.env` file requires two API tokens:
+```
+NSW_CARPARK_API_TOKEN= {get from https://opendata.transport.nsw.gov.au/developers/userguide}
+PUBLIC_API_TOKEN= {choose any token, e.g. AcQhJ8MD0lGDPvNpTCgFYhdwewn90neftYZkm}
+** You must make sure you pass the key you generate into the header when you want to get request.**
 ```
 
-5. Run the application:
+Choose one of the following methods to set up the project:
+
+### Method 1: Using Conda (Recommended for Development)
+
+1. Install [Conda](https://docs.conda.io/en/latest/miniconda.html) if you haven't already
+2. Create and activate the environment:
+```bash
+conda env create -f environment.yaml
+conda activate carpark
+```
+3. Run the application:
 ```bash
 python run.py
 ```
 
-## API Documentation
+### Method 2: Using Docker
+
+1. Install [Docker](https://docs.docker.com/get-docker/) if you haven't already
+2. Build and run the container:
+```bash
+# Build the image
+docker build -t carpark-finder .
+
+# Run the container with environment variables
+docker run -p 8000:8000 --env-file .env carpark-finder
+```
+
+### Method 3: Using pip
+
+1. Create and activate a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate 
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Run the application:
+```bash
+python run.py
+```
+
+### Method 4: AWS-based deployment
+- I deployed this servcide through AWS services
+- Because I hope the code could run in different local env, I direct use AWS ECR, ECS, API gateway and deploy it on cloud. 
+
+---
+---
 
 Once the application is running, you can access:
+- Swagger UI: http://localhost:8000/docs (default redirect)
+
+
+Besides requesting through UI, you could do request through terminal.
+### Find Nearby Car Parks
+
+```bash
+curl -X GET "http://localhost:8000/carparks/nearby?lat=-33.748043&lng=150.69444&radius_km=10" \
+     -H "x-api-key: YOUR_API_KEY"
+```
+Response:
+```json
+[
+  {
+    "facility_id": "111",
+    "name": "Carpark 1",
+    "distance_km": 1.5
+  }
+]
+```
+
+### Find carpark details (availbility)
+
+```
+curl -X GET "http://localhost:8000/carparks/8" \
+     -H "x-api-key: YOUR_API_KEY"
+```
+Response:
+```json
+{
+  "facility_id": "111",
+  "name": "Carpark 1",
+  "total_spots": 100,
+  "available_spots": 25,
+  "status": "Available",
+  "timestamp": "2025-06-14T16:35:23+10:00"
+}
+```
+
+### Openpai Spec
+- **More details about this API could be found through [openapi.json](./openapi/openapi.yaml)**
+
+
+### API Documentation
 - Swagger UI: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
+- openapi.json: http://localhost:8000/openapi.json
 
-## Implementation Details
 
-### Car Park Data
-- The service excludes facility IDs 1-5 as they contain historical data and are not suitable for real-time availability information
-- Each car park must update at least once every 24 hours to be considered active
-- TTL caching is implemented for certain endpoints (e.g., `get_all_carpark_ids()`)
+### Test Coverage Report
+- The test coverage report is deployed in Github Page
+- could get access through https://yi-ding111.github.io/carpark-finder/
 
-### Location-Based Search
-- Uses Haversine formula to calculate distances between user location and car parks
-- Requires latitude, longitude, and radius (in km) as input parameters
-- Example request:
-  ```sh
-  curl -X GET "http://localhost:8000/carparks/nearby?lat=-33.748043&lng=150.69444&radius_km=10" \
-       -H "x-api-key: {API_KEY}"
-  ```
 
-### Availability Calculation
-1. Available spots = total capacity - current occupancy
-2. Uses the "total" field from facility occupancy object for accurate estimates
-3. Status indicators:
-   - "Full": When available spots < 1
-   - "Almost Full": When available spots < 10% of total capacity (configurable)
-   - Uses "~" symbol to indicate approximate availability
+## Important Notes
+
+### Data Assumptions
+- Carparks must update at least once every 24 hours to be considered active
+- Historical carparks (IDs 1-5) do not have useful data (only about historical data)
+- Availability is calculated as: `spots - total`.
+- For declaration: Only use `total` value under `occupancy`. Don't use that under `Zone`.
+- Status indicators:
+  - "Full": < 1 spot available
+  - "Almost Full": <= 10% of total capacity available
+  - "Available": >10% of total capacity available
 
 ### Known Limitations
-- Zone occupancy information may have inconsistencies for facilities:
-  - 486 (Ashfield)
-  - 487 (Kogarah)
-  - 488 (Seven Hills)
-  - 489 (Manly Vale)
-  - 490 (Brookvale)
+- Zone occupancy data may be inconsistent for carparks:
+  - Ashfield (486)
+  - Kogarah (487)
+  - Seven Hills (488)
+  - Manly Vale (489)
+  - Brookvale (490)
 - Total occupancy calculations are not affected by zone information issues
 
-### API Rate Limits
-Default "Bronze Plan" limits:
+### API Limits (Bronze Plan)
 - Daily quota: 60,000 requests
 - Rate limit: 5 requests per second
-- Implements handling for HTTP 429 (Too Many Requests) errors
-
-### Authentication
-- API access requires an API key
-- Currently uses static API keys for simplicity
-- Can be extended to support dynamic API key generation if needed
-
-## Development
-
-### Running Tests
-```bash
-pytest
-```
-
-The project includes unit tests to verify:
-- Proper exclusion of historical facility IDs (1-5)
-- Facility update frequency validation
-- API rate limiting functionality
-
-### Code Quality
-```bash
-# Run linting
-flake8
-
-# Run type checking
-mypy .
-
-# Run formatting
-black .
-```
-
-
-
-## Testing
-The project includes unit tests to verify:
-- Proper exclusion of historical facility IDs (1-5)
-- Facility update frequency validation
-- API rate limiting functionality
-
-if i want to get the list of carparks based off the location and distance. I need to provide my location and do calculation with the park&ride locations. 
-
-after querying, I found that the carparks with facility ids: 1,2,3,4,5 is about historical data, they cannot meet what we need right here. So I would drop them during the calculation. (more details, when qeurying facility_id is 1 or 2, we cannot get the resource.)
-
-
-so I should add the unit test for this. check the carparks id, ensure that each facility's updates are working efficiently.
-
-
-
-
-
-
-The default account plan is the "Bronze Plan", which has the following limits:
-
-Quota: 60,000 per day
-
-Rate Limit: 5 per second
-
-based off these limitations, I need to add the corresponding actions in the code to avoid the problem.
-
-if facing http error 429: too many requests. 
-
-
-
-
-
-
-
-
-
-for the radium km limitation, I would calculate all distances between the current location and the carpark's location by Haversine formula.
-
-
-
-availability:
-
-
-
-To calculate the number of available parking lots, it is recommended to use the following formula.
-Availability = spots – total
-2. Displays the number of parking lots left in the car park facility. Use the “total” in facility occupancy object
-for an accurate estimates of occupancy information of the car park.
-3. Calculate and display “Full” when the available parking lots drop below 1.
-4. Display “Almost Full” when the available parking lots drop to less than 10%. This figure should be
-configurable and adjusted according to customers’ feedback.
-5. To manage customers’ expectations, indicate that the car park data may differ from actual parking. It is
-recommended to put that the approximate sign (~) to inform the customers that this is an estimated car
-park availability information.
-
-
-
-about the the zone occupancy information, it may has some problems for: 486 (Ashfield), 487 (Kogarah), 488 (Seven Hills), 489 (Manly Vale), 490 (Brookvale). But I assume the total number under Occupancy does not influeced by the information in Zone. 
-
-
-
-
-
-
-
-
-
-for the API i created:
-
-I want to deploy it as an open api and everyone could use it, but with API token
-
-for the easy development, I only use the static API key right here, I could update as dynamic API keys if necessary.
-
-
-
-
-
-
-about the update frequence:
-
-because some carparks follow on counter change rule. I do not know about the exact update frequence. So I define that each carpark have the update at least once each day. If one carpark does not update over 24 hours, I have reason to say that the carpark is no update and do not cover them in consideration.
-
-
-I set up some ttl cache for some requests: get_all_carpark_ids(), 
-
-
-how to get the request
-
-```sh
-curl -X GET "http://localhost:8000/carparks/nearby?lat=-33.748043&lng=150.69444&radius_km=10" \
-     -H "x-api-key: {API_KEY}"
-```
+- HTTP 429 errors are handled automatically within this API service
+- This API service also ask 5 request per second limit.
+
+
+### Caching Strategy
+- Initial requests may take a few seconds to fetch fresh data from NSW Transport API
+- Responses are cached for 1 hour to improve performance of subsequent requests
+- Cache is automatically invalidated after 1 hour to ensure data freshness
+- The cache is not about the carpark details, only for the active carpark ids.
