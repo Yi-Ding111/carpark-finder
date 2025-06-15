@@ -1,11 +1,17 @@
-import time
-import requests
-from typing import Dict, Set, Optional
-from datetime import datetime
-from cachetools import cached
 import logging
+import time
+from datetime import datetime
+from typing import Dict, Optional, Set
 
-from app.core.config import NSW_API_KEY, MAX_REQUESTS_PER_SECOND
+import requests
+from cachetools import cached
+
+from app.core.config import (
+    MAX_REQUESTS_PER_SECOND,
+    NSW_TRANSPORT_BASE_API_URL,
+    get_facility_url,
+    get_nsw_headers,
+)
 from app.services.cache_service import (
     carpark_ids_cache,
     carpark_locations_cache,
@@ -81,14 +87,14 @@ def make_api_request(url, headers) -> dict | None:
 
     try:
         # Make the API request and increase request_count
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         request_count += 1
 
         # Handle throttle limit exceeded (HTTP 429) by waiting and retrying
         if response.status_code == 429 or response.status_code == 403:
             wait_for_next_second()
             reset_request_counter()
-            response = requests.get(url, headers=headers)
+            response = requests.get(url, headers=headers, timeout=10)
             request_count += 1
 
         # do not return the response if the request fails
@@ -98,7 +104,7 @@ def make_api_request(url, headers) -> dict | None:
 
     except requests.exceptions.RequestException as e:
         # 404 error, cannot find the resources
-        print(f"API request failed: {e}")
+        logger.error(f"API request failed: {e}")
 
         return None
 
@@ -109,16 +115,15 @@ def get_all_carpark_ids() -> Optional[Dict]:
     Query all carparks information from the NSW Transport API.
 
     Returns:
-        dict: Dictionary mapping facility IDs to facility names, or None if request fails
+        dict: Dictionary mapping facility IDs to facility names,
+              or None if request fails
         API response example:
             {
                 "facility_id": "facility_name"
                 ...
             }
     """
-    url = "https://api.transport.nsw.gov.au/v1/carpark"
-    headers = {"Authorization": f"apikey {NSW_API_KEY}", "Accept": "application/json"}
-    return make_api_request(url, headers)
+    return make_api_request(url=NSW_TRANSPORT_BASE_API_URL, headers=get_nsw_headers())
 
 
 def get_carpark_details(facility_id: str, retry_count: int = 3) -> Optional[Dict]:
@@ -127,10 +132,12 @@ def get_carpark_details(facility_id: str, retry_count: int = 3) -> Optional[Dict
 
     Parameters:
         facility_id (str): The ID of the carpark facility to query
-        retry_count (int, optional): Number of retry attempts if request fails. Defaults to 3.
+        retry_count (int, optional): Number of retry attempts if request fails.
+                                   Defaults to 3.
 
     Returns:
-        dict: JSON response containing carpark details if successful, None if all retries fail
+        dict: JSON response containing carpark details if successful,
+              None if all retries fail
 
         {
             "tsn":,
@@ -172,28 +179,25 @@ def get_carpark_details(facility_id: str, retry_count: int = 3) -> Optional[Dict
         }
     """
 
-    url = f"https://api.transport.nsw.gov.au/v1/carpark?facility={facility_id}"
-    headers = {"Authorization": f"apikey {NSW_API_KEY}", "Accept": "application/json"}
-
     for attempt in range(retry_count):
         if attempt > 0:
-            logger.info(f"Retry {attempt}/{retry_count-1} for facility {facility_id}")
-        response = make_api_request(url, headers)
+            logger.info("Retry {}/{} for facility {}".format(attempt, retry_count - 1, facility_id))
+        response = make_api_request(url=get_facility_url(facility_id), headers=get_nsw_headers())
         if response:
+            logger.info("API request successful for facility {}".format(facility_id))
             return response
     return None
 
 
-def is_carpark_no_update(
-    details: Dict, current_time: datetime, no_update_hours: int = 24
-) -> bool:
+def is_carpark_no_update(details: Dict, current_time: datetime, no_update_hours: int = 24) -> bool:
     """
     Determine if a carpark is considered no update.
 
     Parameters:
         details (dict): The carpark details
         current_time (datetime): The current time
-        no_update_hours (int): The number of hours after which the carpark is considered no update
+        no_update_hours (int): The number of hours after which the carpark is
+                              considered no update
 
     Returns:
         bool: True if the carpark is considered no update, False otherwise
@@ -225,10 +229,11 @@ def fetch_no_update_carparks(carpark_ids: Dict, current_time: datetime) -> Set[s
     """
     no_update_set = set()
     for facility_id, _ in carpark_ids.items():
-        logger.debug(f"Checking facility {facility_id}...")
+        logger.debug("Checking facility {}...".format(facility_id))
         details = get_carpark_details(facility_id)
         if not details or is_carpark_no_update(details, current_time):
             no_update_set.add(str(facility_id))
+            logger.info("Facility {} is no-update".format(facility_id))
     return no_update_set
 
 
@@ -257,11 +262,15 @@ def get_carpark_locations() -> Optional[Dict]:
             {
                 "carparks": [
                     {
-                        "facility_id":,
-                        "name":,
-                        "location":{
-                            "latitude":,
-                            "longitude":
+                        "facility_id": str,
+                        "name": str,
+                        "location": {
+                            "latitude": float,
+                            "longitude": float
+                        }
+                    }
+                ]
+            }
     """
 
     # Get mapping of facility IDs to names
@@ -297,7 +306,7 @@ def get_carpark_locations() -> Optional[Dict]:
             }
             carparks_list.append(carpark)
         except (TypeError, ValueError) as e:
-            logger.error(f"Error processing carpark {facility_id}: {e}")
+            logger.error("Error processing carpark {}: {}".format(facility_id, e))
             continue
 
     return {"carparks": carparks_list}
@@ -321,7 +330,7 @@ def available_status(spots: int, occupancy: int) -> str:
     available_spots = spots - occupancy
     if available_spots <= 0:
         return "Full"
-    elif available_spots <= spots * 0.2:
+    elif available_spots <= spots * 0.1:
         return "Almost Full"
     else:
         return "Available"

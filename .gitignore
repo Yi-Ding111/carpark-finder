@@ -1,10 +1,13 @@
 # Python cache
 __pycache__/
+.pytest_cache/
+.mypy_cache/
 
 # Environment
 .env
 venv/
 .env/
+.pre-commit-config.yaml
 
 # macOS
 .DS_Store
@@ -12,9 +15,6 @@ venv/
 # Development folders
 dev/
 task/
-
-# GitHub
-.github/
 
 # logs
 logs/

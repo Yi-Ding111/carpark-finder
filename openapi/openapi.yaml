@@ -1,0 +1,315 @@
+openapi: 3.1.0
+servers:
+  - url: /v1
+security:
+  - APIKeyHeader: []
+info:
+  title: Carpark Finder API
+  description: It is an API service to find nearby carparks (Park&Ride) in NSW
+  version: 1.0.0
+  contact:
+    name: Yi Ding
+    email: dydifferent@gmail.com
+paths:
+  /carparks/nearby:
+    get:
+      tags:
+        - carparks
+      summary: Get Nearby Carparks
+      description: |
+        Get a list of carparks within the specified radius from a given location.
+
+        **Parameters:**
+        - `lat` (float): Latitude of the search point  
+        - `lng` (float): Longitude of the search point  
+        - `radius_km` (float, optional): Search radius in kilometers (default: 10km)
+
+        **Returns:**
+        - A list of nearby carparks with ID, name, and distance.
+
+      operationId: get_nearby_carparks_carparks_nearby_get
+      security:
+        - APIKeyHeader: []
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+            description: Latitude of the search point
+            title: Lat
+          description: Latitude of the search point
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+            description: Longitude of the search point
+            title: Lng
+          description: Longitude of the search point
+        - name: radius_km
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 0
+            description: Search radius in kilometers
+            default: 10
+            title: Radius Km
+          description: Search radius in kilometers
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Carpark'
+                title: Response Get Nearby Carparks Carparks Nearby Get
+              examples:
+                sample:
+                  summary: Example Response for /carparks/nearby
+                  value:
+                    - facility_id: "111"
+                      name: "Carpark 1"
+                      distance_km: 1.5
+        "403":
+          description: Forbidden - Invalid API Key/Not Authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "The API Key is invalid."
+        "429":
+          description: Too Many Requests - Rate Limit Exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "Too many requests. Please try again in a second."
+        "500":
+          description: Internal Server Error - Unexpected Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "Internal server error"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+              examples:
+                sample:
+                  summary: Example Response for /carparks/nearby
+                  value:
+                    - loc: ["query", "lat"]
+                      msg: "Input should be a valid number, unable to parse string as a number"
+                      type: "float_parsing"
+                      input: "Invalid input"
+
+  /carparks/{facility_id}:
+    get:
+      tags:
+        - carparks
+      summary: Get Carpark Available Details
+      description: |
+        Get detailed information about a specific carpark.
+
+        **Arguments:**
+        - `facility_id` (`str`): ID of the carpark facility 
+
+        **Returns:**
+        - `dict`: Carpark details including total spots, available spots, status, and last update
+      operationId: get_carpark_available_details_carparks__facility_id__get
+      security:
+        - APIKeyHeader: []
+      parameters:
+        - name: facility_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Facility Id
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarparkDetail'
+              examples:
+                sample:
+                  summary: Example Response for /carparks/111
+                  value:
+                    facility_id: "111"
+                    name: "Carpark 1"
+                    total_spots: 100
+                    available_spots: 25
+                    status: "Available"
+                    timestamp: "2025-06-14T16:35:23+10:00"
+        "403":
+          description: Forbidden - Invalid API Key/Not Authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "The API Key is invalid."
+        "404":
+          description: Not Found - Carpark Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "Carpark with ID 111 not found."
+        "429":
+          description: Too Many Requests - Rate Limit Exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "Too many requests. Please try again in a second."
+        "500":
+          description: Internal Server Error - Unexpected Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "Internal server error"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+              examples:
+                sample:
+                  summary: Example Response for /carparks/daasdas
+                  value:
+                    detail:
+                      - type: string_pattern_mismatch
+                        loc: ["path", "facility_id"]
+                        msg: "String should match pattern '^\\d+$'"
+                        input: "invalid input"
+                        ctx:
+                          pattern: "^\\d+$"
+  /:
+    get:
+      summary: Read Root
+      description: Redirect to the Swagger UI page as default page
+      operationId: read_root__get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+components:
+  schemas:
+    Carpark:
+      properties:
+        facility_id:
+          type: string
+          title: Facility Id
+        name:
+          type: string
+          title: Name
+        distance_km:
+          type: number
+          title: Distance Km
+      type: object
+      required:
+        - facility_id
+        - name
+        - distance_km
+      title: Carpark
+    CarparkDetail:
+      properties:
+        facility_id:
+          type: string
+          title: Facility Id
+        name:
+          type: string
+          title: Name
+        total_spots:
+          type: integer
+          title: Total Spots
+        available_spots:
+          type: integer
+          title: Available Spots
+        status:
+          type: string
+          title: Status
+        timestamp:
+          anyOf:
+            - type: string
+              format: date-time
+            - type: "null"
+          title: Timestamp
+      type: object
+      required:
+        - facility_id
+        - name
+        - total_spots
+        - available_spots
+        - status
+        - timestamp
+      title: CarparkDetail
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError
+  securitySchemes:
+    APIKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key

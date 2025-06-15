@@ -1,10 +1,11 @@
-from pydantic import BaseModel
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel
 
 
 class Carpark(BaseModel):
-    facility_id: int
+    facility_id: str
     name: str
     distance_km: float
 
